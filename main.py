@@ -12,7 +12,15 @@ import charts as ch
 import credintails
 
 os.system('cls')
-etl.load()
+# Changing credintails option (due including credintials.py file to the .gitignore)
+cred_change=input('To continue press any key, to use not default user name and password to the Database press 1: ')
+if cred_change=='1':
+    user=input('Enter User name: ')
+    password=input('Enter User password: ')
+else:
+    user=credintails.login()[0]
+    passw=credintails.login()[1]
+etl.load(user, passw)
 os.system('cls')
 print('Preparing to work'.center(130)+'\n')
 
@@ -20,7 +28,7 @@ print('Preparing to work'.center(130)+'\n')
 # Load from DB, creating all dataframes for tables, same tempview 
 # and one corrected with date type for TIMED field from Credit table
 spark = SparkSession.builder.appName('Cards').getOrCreate()
-db_session = mysql.connector.connect(user=credintails.login()[0], password=credintails.login()[1])
+db_session = mysql.connector.connect(user=user, password=passw)
 db_pointer = db_session.cursor()
 db_pointer.execute("USE creditcard_capstone;")
 
@@ -28,8 +36,7 @@ def from_DB (t_name):
     t_name_full = f"creditcard_capstone.{t_name}"
     df = spark.read.format("jdbc") \
     .options(driver="com.mysql.cj.jdbc.Driver",\
-    user=credintails.login()[0],\
-    password=credintails.login()[1],\
+    user=user, password=passw,\
     url="jdbc:mysql://localhost:3306/creditcard_capstone",\
     dbtable=t_name_full).load()
     return df
