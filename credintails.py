@@ -1,2 +1,1 @@
-def login():
-    return {'root':'password'}
+def login(): return ['root','password']

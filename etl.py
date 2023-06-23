@@ -6,13 +6,14 @@ import requests
 import pandas as pd
 import re
 import os, time
+import credintails
 
 # All paths to files linked to the directory with main 3 Python files.
 def load():
     os.system('cls')
     print('Loading and mapping data'.center(130))
     # Reading customer table with near to requested order of fields, with integer type for key (SSN) and string for all other columns.
-    # Dropping rows without key, change style for First, Middle, Last names.     
+    # Dropping rows without key, change style for First, Middle, Last names.    
     spark = SparkSession.builder.appName('Cards').getOrCreate()
     schema_cust = StructType([StructField('SSN',IntegerType(),True),
     StructField('FIRST_NAME',StringType(),True),
@@ -123,7 +124,7 @@ def load():
 
     #1.2 Create and save to DB
     print('Loading to the Database'.center(130))
-    db_session = mysql.connector.connect(user="root", password="password")
+    db_session = mysql.connector.connect(user=credintails.login[0], password=credintails.login[1]) #(user="root", password="password")
     db_pointer = db_session.cursor()
     db_pointer.execute("DROP DATABASE IF EXISTS creditcard_capstone;")
     db_pointer.execute("CREATE DATABASE IF NOT EXISTS creditcard_capstone;")
@@ -135,8 +136,8 @@ def load():
         .mode("append") \
         .option("url", "jdbc:mysql://localhost:3306/creditcard_capstone") \
         .option("dbtable", t_name_full) \
-        .option("user", "root") \
-        .option("password", "password") \
+        .option("user", credintails.login[0]) \
+        .option("password", credintails.login[1]) \
         .save()
         # Corrected types in DB from string to varchar with maximum length equal to maximum length for the field
         df_str_name=[f.name for f in fname.schema.fields if f.dataType==StringType()]
