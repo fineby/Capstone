@@ -5,7 +5,7 @@ import mysql.connector
 import requests
 import pandas as pd
 import re
-import os, sys, time
+import os, time
 
 # All paths to files linked to the directory with main 3 Python files.
 def load():

@@ -114,8 +114,6 @@ def gr_group2(pd_gr4, pd_gr5, pd_gr6, pd_gr7):
     f, ax = plt.subplots() 
     sns.barplot(x = 'Transactions', y = 'Month', data = pd_gr6, color = '#ffa600', edgecolor = 'w'). \
     set_title('The top three months with the largest transaction data')
-    #sns.set(rc={'axes.facecolor':'lightgrey', 'figure.facecolor':'lightgrey'})
-    # color = 'b'
     ax.set_xlim(200000,203000)
     ax.bar_label(ax.containers[0])
     plt.show()
