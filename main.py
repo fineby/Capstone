@@ -20,7 +20,7 @@ print('Preparing to work'.center(130)+'\n')
 # Load from DB, creating all dataframes for tables, same tempview 
 # and one corrected with date type for TIMED field from Credit table
 spark = SparkSession.builder.appName('Cards').getOrCreate()
-db_session = mysql.connector.connect(user=credintails.login[0], password=credintails.login[1])
+db_session = mysql.connector.connect(user=credintails.login()[0], password=credintails.login()[1])
 db_pointer = db_session.cursor()
 db_pointer.execute("USE creditcard_capstone;")
 
@@ -28,8 +28,8 @@ def from_DB (t_name):
     t_name_full = f"creditcard_capstone.{t_name}"
     df = spark.read.format("jdbc") \
     .options(driver="com.mysql.cj.jdbc.Driver",\
-    user=credintails.login[0],\
-    password=credintails.login[1],\
+    user=credintails.login()[0],\
+    password=credintails.login()[1],\
     url="jdbc:mysql://localhost:3306/creditcard_capstone",\
     dbtable=t_name_full).load()
     return df
