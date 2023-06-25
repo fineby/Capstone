@@ -8,7 +8,7 @@ import webbrowser
 import os, time
 
 #3.2 Used Folium with external GEO data from file to generate Chrolopleth map with automatic linspace to 3 category.
-# For output generated HTML file. It's saved to the HDD and loaded to the default browser.
+# For output generated HTML files. It's saved to the HDD and loaded to the default browser.
 def usa_map_display(pd_gr2):
     us_geo = str(os.path.sys.path[0])+"\Assets\geo.json"
     state_scale = np.linspace(pd_gr2['Number of customers'].min(), pd_gr2['Number of customers'].max(), 4, dtype=int)
@@ -35,7 +35,7 @@ def usa_map_display(pd_gr2):
 def gr_group1(pd_gr1, pd_gr3, pd_gr2):
     os.system('cls')
     sns.set(rc={'axes.facecolor':'lightgrey', 'figure.facecolor':'lightgrey'})
-    #3.1 Mathplotlib histogram with automatic binning by Numpy. Categorical and numerical edges displaing 
+  #3.1 Matplotlib histogram with automatic binning by Numpy. Categorical and numerical edges displaying 
     # at the chart.
     count_bin, bin_edges = np.histogram(pd_gr1['Transaction rate'], 3)
     pd_gr1['Transaction rate'].plot(kind='hist', xticks=bin_edges, color=['#003f5c'])
@@ -51,7 +51,7 @@ def gr_group1(pd_gr1, pd_gr3, pd_gr2):
     plt.show()
     os.system('cls')
 
-    # 3.3  Mathplotlib line chart with annotation.
+    # 3.3  Matplotlib line chart with annotation.
     plt.rcParams["figure.figsize"] = (8,5)
     pd_gr3.plot(title='Sum of all transactions for top 10 customers',ylabel='Sum',legend='',marker='o',ms=10, linewidth=3.0)
     plt.xlabel('Customer')
@@ -88,7 +88,7 @@ def h_trans_display(pd_gr7):
 def gr_group2(pd_gr4, pd_gr5, pd_gr6, pd_gr7):
     os.system('cls')
     sns.set(rc={'axes.facecolor':'lightgrey', 'figure.facecolor':'lightgrey'})
-    #5.1 Mathplotlib pie chart.
+    #5.1 Matplotlib pie chart.
     ax = plt.axes()
     ax.pie(pd_gr4["Value"], labels=pd_gr4["Category"], autopct='%1.2f%%', labeldistance=.28, \
     colors=['#ffa600','#003f5c'], shadow=True, explode=[0,0.08], textprops={'fontsize': 10, 'color': 'white'})
@@ -96,7 +96,7 @@ def gr_group2(pd_gr4, pd_gr5, pd_gr6, pd_gr7):
     plt.tight_layout()
     plt.show()
 
-    #5.2 Mathplotlib bars multiple chart.
+    #5.2 Matplotlib bars multiple charts.
     X = ['Rejection','Approving']
     Y = pd_gr5.iloc[:2,1]
     Z = pd_gr5.iloc[2:,1]
