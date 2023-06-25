@@ -12,7 +12,7 @@ import charts as ch
 import credintails
 
 os.system('cls')
-# Changing credintails option (due including credintials.py file to the .gitignore)
+# Changing credentials option (due including credintials.py file to the .gitignore)
 cred_change=input('To continue press any key, to use not default user name and password to the Database press 1: ')
 if cred_change=='1':
     usr=input('Enter User name: ')
@@ -25,7 +25,7 @@ os.system('cls')
 print('Preparing to work'.center(130)+'\n')
 
 #2 Application Front-End
-# Load from DB, creating all dataframes for tables, same tempview 
+# Load from DB, creating all data frames for tables, same tempview 
 # and one corrected with date type for TIMED field from Credit table
 spark = SparkSession.builder.appName('Cards').getOrCreate()
 db_session = mysql.connector.connect(user=usr, password=passw)
@@ -49,20 +49,20 @@ df_loan=from_DB("`CDW-SAPP_loan_application`")
 df_credit.createOrReplaceTempView("credit_table")
 df_cust.createOrReplaceTempView("cust_table")
 df_credit.withColumn('TIMED', F.to_date(df_credit.TIMED, 'yyyyMMdd')).createOrReplaceTempView("credit_table_date")
-# Load and correct dictinary for the chart 3.2
+# Load and correct dictionary for the chart 3.2
 state_dict = pd.read_csv(str(os.path.sys.path[0])+'\Assets\states.csv',index_col=0).to_dict('dict')['ALL']
 state_dict = {v: k for k, v in state_dict.items()}
 
-#3.1 Creating pandas dataframe for the chart from Spark DF using PySpark commands
+#3.1 Creating Pandas dataframe for the chart from Spark DF using PySpark commands
 df_gr1=df_credit.select('TRANSACTION_TYPE').groupby('TRANSACTION_TYPE').count().orderBy(F.col('count').desc())
 pd_gr1 = df_gr1.withColumnRenamed("TRANSACTION_TYPE","Type of transaction"). \
 withColumnRenamed("count","Transaction rate").toPandas()
-#3.2 Creating pandas dataframe for the chart from Spark DF using PySpark commands, change names for states
+#3.2 Creating Pandas dataframe for the chart from Spark DF using PySpark commands, change names for states
 pd_gr2=df_cust.select('CUST_STATE').groupby('CUST_STATE').count().orderBy(F.col('count').desc()). \
 withColumnRenamed("CUST_STATE","Customer state").withColumnRenamed("count","Number of customers"). \
 replace(state_dict, 1).toPandas()
-#3.3 Creating pandas dataframe for the chart from Spark DF using PySpark commands,
-# create field with full name and new line literal for futher chart using
+#3.3 Creating Pandas dataframe for the chart from Spark DF using PySpark commands,
+# create field with full name and new line literal for further chart using
 df_gr3=df_credit.select('CUST_SSN','TRANSACTION_VALUE').groupby('CUST_SSN').sum()
 df_ssn_join=df_gr3.join(df_cust,df_gr3.CUST_SSN == df_cust.SSN)
 pd_gr3 = df_ssn_join.withColumn('CUST_SSN', F.concat(df_ssn_join['FIRST_NAME'],F.lit('\n'),df_ssn_join['MIDDLE_NAME'],F.lit('\n'), \
@@ -70,14 +70,14 @@ df_ssn_join['LAST_NAME'])).orderBy(F.col('sum(TRANSACTION_VALUE)').desc()).limit
 select(F.col("CUST_SSN").alias("Customer name"), F.col('sum(TRANSACTION_VALUE)').alias("Sum of transactions")).toPandas()
 pd_gr3.sort_values(by=['Sum of transactions'],ascending=True,inplace=True)
 pd_gr3.set_index('Customer name',inplace=True)
-# 5.1 Creating pandas dataframe for the chart from dictinory using PySpark commands
+# 5.1 Creating Pandas dataframe for the chart from dictionary using PySpark commands
 gr4_se_total=df_loan.filter((F.col('Self_Employed')=='Yes')).count()
 dict_gr4={'Approved':100*df_loan.filter((F.col('Self_Employed')=='Yes') & \
 (F.col('Application_Status')=='Y')).count()/gr4_se_total, \
  'Not approved': 100*df_loan.filter((F.col('Self_Employed')=='Yes') & \
 (F.col('Application_Status')=='N')).count()/gr4_se_total}
 pd_gr4=pd.DataFrame(list(dict_gr4.items()),columns=['Category','Value'])
-#5.2 Creating pandas dataframe for the chart from dictinory with dictinory value transformation using PySpark commands
+#5.2 Creating Pandas dataframe for the chart from dictionary with dictionary value transformation using PySpark commands
 total_applic=df_loan.select('Application_Status').count()
 dict_gr5={'Male married applicants rejection rate':['Male','Yes','N',total_applic], \
 'Male married applicants approving rate':['Male','Yes','Y', total_applic], \
@@ -87,14 +87,14 @@ for k,v in dict_gr5.items():
     dict_gr5[k]=100*(df_loan.filter((F.col('Gender')==v[0]) & (F.col('Married')==v[1]) & \
     (F.col('Application_Status')==v[2])).count())/v[3]
 pd_gr5=pd.DataFrame(list(dict_gr5.items()),columns=['Category','Value'])
-#5.3 Creating pandas dataframe for the chart with SQL commands and month change
+#5.3 Creating Pandas dataframe for the chart with SQL commands and month change
 pd_gr6=spark.sql("SELECT month(credit_table_date.TIMED) AS Month, SUM(credit_table_date.TRANSACTION_VALUE) AS Transactions \
 FROM credit_table_date GROUP BY Month ORDER BY Transactions DESC LIMIT 3").toPandas()
 month_dict={1:'January',2:'February',3:'March',4:'April',5:'May',6:'June',7:'July',8:'August',9:'September', \
 10:'October',11:'November',12:'December'}
 for k,v in month_dict.items(): pd_gr6.loc[:,'Month'].replace(k,v, inplace=True)
 pd_gr6['Transactions'].astype('float').round(2)
-#5.4 Creating pandas dataframe for the chart with SQL commands
+#5.4 Creating Pandas dataframe for the chart with SQL commands
 pd_gr7=spark.sql("SELECT credit_table_date.BRANCH_CODE, SUM(credit_table_date.TRANSACTION_VALUE) AS Healthcare \
 FROM credit_table_date WHERE TRANSACTION_TYPE='Healthcare' GROUP BY BRANCH_CODE ORDER BY Healthcare DESC"). \
 toPandas().set_axis(['Branch', 'Healthcare transactions'], axis='columns')
@@ -111,7 +111,7 @@ def mailcheck(mail_2_chek):
     else: return False
 
 #2.1.1 Input filtered by type, length, as well as by zip, year+month (if not in the database request not executing). Time used in string format.
-# For Month input adding 0, if needed. Request used PySpark commands.
+# For Month input adding 0, if needed. Request used PySpark commands
 def request1():
     w=True
     while w:
@@ -139,7 +139,7 @@ def request1():
         else: 
             w = False
             os.system('cls')
-#2.1.2 Input filtered by type, correct values from the list of choices. Request used PySpark commands.
+#2.1.2 Input filtered by type, correct values from the list of choices. Request used PySpark commands
 def request2():
     w=True
     while w:
@@ -164,7 +164,7 @@ def request2():
         else: 
             w=False
             os.system('cls')
-#2.1.3 Input filtered by type, correct values from the list of choices. Request used PySpark commands.
+#2.1.3 Input filtered by type, correct values from the list of choices. Request used PySpark commands
 def request3():
     w=True
     while w:
@@ -190,7 +190,7 @@ def request3():
         else: 
             w=False
             os.system('cls')
-#2.2.1 Request used SQL commands with controling for empty result to find result with SSN or full name data input with low/capitalise solving
+#2.2.1 Request used SQL commands with controlling for empty result to find result with SSN or full name data input with low/capitalize solving
 def request4():
     w = True
     while w:
@@ -226,9 +226,9 @@ def request4():
         else: 
             w=False
             os.system('cls')
-#2.2.2 Input SSN cheked in database. It is using like a key to modify all other fields. Full name data input with low/capitalise solving,
+#2.2.2 Input SSN checked in database. It is used like a key to modify all other fields. Full name data input with low/capitalize solving,
 # phone number and Email inputs controlled by templates, zip and Credit Card number for digit and length. Current timestamp saved with new data to the DB.
-# Request used SQL commands. 
+# Request used SQL commands.
 def request5():
     w=True
     while w:
@@ -280,7 +280,7 @@ def request5():
         else: 
             w = False
             os.system('cls')
-#2.2.3  Input filtered by type and length. Request used SQL commands, controling for empty result. Time used in string format.
+#2.2.3  Input filtered by type and length. Request used SQL commands, controlling for empty results. Time used in string format.
 def request6():
     w=True
     while w:
@@ -306,8 +306,8 @@ def request6():
         else: 
             w = False
             os.system('cls')
-#2.2.4 Input control correct format for dates. Request used SQL commands, controling for empty result.
-# For request could be used SSN or full name data input with low/capitalise solving. Time used in datetime format.
+#2.2.4 Input control correct format for dates. Request used SQL commands, controlling for empty results.
+# For request could be used SSN or full name data input with low/capitalize solving. Time used in datetime format.
 def request7():
     w = True
     while w:
@@ -368,7 +368,6 @@ def request7():
             w=False
             os.system('cls')
 
-# Main terminal
 while True:
     print("\t**********************************************".center(120))
     print("\t***              Main Menu                 ***".center(120))
