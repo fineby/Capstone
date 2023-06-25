@@ -7,7 +7,7 @@ import pandas as pd
 import re
 import os, time
 
-# All paths to files linked to the directory with main 3 Python files.
+# All paths to files linked to the directory with 3 main Python files.
 def load(usr, passw):
     os.system('cls')
     print('Loading and mapping data'.center(130))
@@ -33,7 +33,7 @@ def load(usr, passw):
     df_cust = df_cust.withColumn('FIRST_NAME', F.initcap(df_cust.FIRST_NAME)). \
     withColumn('MIDDLE_NAME', F.lower(df_cust.MIDDLE_NAME)). \
     withColumn('LAST_NAME', F.initcap(df_cust.LAST_NAME)) 
-    # Creating new column for address, as requested.
+    # Creating a new column for address, as requested.
     addr_cust=df_cust.select(df_cust.SSN, F.concat_ws(',',df_cust.APT_NO, df_cust.STREET_NAME).alias('FULL_STREET_ADDRESS1'))
     df_cust=df_cust.join(addr_cust, ['SSN'])
     pd_cust=df_cust.drop('STREET_NAME','APT_NO').toPandas()
@@ -59,7 +59,7 @@ def load(usr, passw):
     withColumn('LAST_UPDATED',df_cust['LAST_UPDATED'].cast(TimestampType()))
 
     # Reading branch table with requested order of fields, with integer type for key (BRANCH_CODE) and string for all other columns.
-    # Dropping rows without key, change ZIP for null to 99999.
+    # Dropping rows without key, change ZIP from null to 99999.
     schema_branch="`BRANCH_CODE` INT, `BRANCH_NAME` STRING, `BRANCH_STREET` STRING, `BRANCH_CITY` STRING, `BRANCH_STATE` STRING, `BRANCH_ZIP` STRING, `BRANCH_PHONE` STRING, `LAST_UPDATED` STRING"
     df_branch = spark.read.format('json').load(str(os.path.sys.path[0])+'\Assets\CDW_SAPP_BRANCH.json', schema=schema_branch). \
     na.drop(subset=['BRANCH_CODE']).na.fill(value='99999',subset=['BRANCH_ZIP']).withColumnRenamed("BRANCH_PHONE","BRANCH_PHONE1")
@@ -83,7 +83,7 @@ def load(usr, passw):
     na.drop(subset=['TRANSACTION_ID']). \
     withColumnRenamed("CREDIT_CARD_NO","CUST_CC_NO")  
     df_credit = df_credit.withColumn('TRANSACTION_ID',df_credit['TRANSACTION_ID'].cast(IntegerType()))
-    # Creating TIMED column, change names and order for columns.
+   # Creating a TIMED column, changing names and order for columns.
     time_credit=df_credit.select(df_credit.TRANSACTION_ID, F.concat_ws(' ',df_credit.YEAR, df_credit.MONTH, df_credit.DAY).alias('TIMED1'))
     df_credit=df_credit.join(time_credit, ['TRANSACTION_ID'])
     pd_credit=df_credit.drop('YEAR','MONTH','DAY').toPandas()
@@ -104,7 +104,7 @@ def load(usr, passw):
     withColumn('TRANSACTION_ID',df_credit['TRANSACTION_ID'].cast(IntegerType()))
 
     #4
-    # 4.1 Get data from End point
+    # 4.1 Get data from Endpoint
     url='https://raw.githubusercontent.com/platformps/LoanDataset/main/loan_data.json'
     response=requests.get(url)
     os.system('cls')
@@ -116,12 +116,12 @@ def load(usr, passw):
     loan_dict=response.json()
     pd_df_loan = pd.DataFrame(loan_dict)
     df_loan = spark.createDataFrame(pd_df_loan)
-    # Correcting types and simple cleaning of data (deleting + for Dependens)
+    # Correcting types and simple cleaning of data (deleting + for Dependents)
     df_loan=df_loan.withColumn('Dependents', F.regexp_replace('Dependents', '^([0-9]*)\+', '$1'))
     df_loan=df_loan.withColumn('Dependents',df_loan['Dependents'].cast(IntegerType())) \
     .withColumn('Credit_History',df_loan['Credit_History'].cast(IntegerType()))
 
-    #1.2 Create and save to DB
+    #1.2 Create and save to the DB
     print('Loading to the Database'.center(130))
     db_session = mysql.connector.connect(user=usr, password=passw)
     db_pointer = db_session.cursor()
